@@ -1,0 +1,87 @@
+Julien ROLLET ............................................[14106141]
+Clement RICHET DE FORGES .................................[14107937]
+Victor BUSA ..............................................[14107023]
+
+--[ 1 .How our attack works :
+
+This is a Connect Back Shellcode. So in our payload we create a new
+socket and we connect to that socket on port 12345 and ip addr
+127.0.0.1 then we duplicate the socket descriptor to stderr, stdin
+and stdout using dup2 and we finally execute the shell calling execve.
+
+As our socket use another port we have to create a socket listening on
+port 12345. To do so we just launch netcat on client side computer using :
+
+nc -v -l 127.0.0.1 12345
+
+then we laucnh the server file on the server :
+
+ ./server &
+ 
+ and finally we launch our exploit on our computer :
+ 
+ ./exploit
+ 
+ and finally we can see that we are connected on our listening socket :
+ 
+[student@localhost exam]$ nc -v -l 127.0.0.1 12345
+Connection from 127.0.0.1 port 12345 [tcp/italk] accepted
+
+and we are able to run commands. For example, if we enter whoami we can
+see that the response is : root whereas we launch nc thru student user.
+that means that whoami is executed on server side and the response is
+displayed on client side (because we launch ./server as a root).
+
+
+
+
+--[ 2. Problems with our approach :
+
+The fact we use a Connect Back Shellcode lower the risk that a firewall
+stop our attack, as a user should be able to connect to internet or to
+only service like torrent, online game on so on. So the firewall is more
+likely not to warm the user that the software try to reach a distant host.
+So the connect back shellcode is better than a port binding shellcode
+because in a port binding shellcode the firewall see that a distant host
+try to connect to our computer and so will warm us and end the connection.
+Yet a Connect Back Shellcode is still easily detectable. For example when
+we are on windows and we want to play videogames online, the windows
+firewall warm us : "Do you want to add a execption to the firewall..."
+So the connect back shellcode is still easily detectable.
+Thus the best solution would be to implement a Descriptor Socket Reuse
+Shellcode. But as we saw (see explanations.txt) it doesn't work in our
+case. the remote shell in client side "freeze"...
+
+main drawback : the shellcode is quite long (83 bytes in our case). If
+we only have to reuse a socket descriptor our shellcode could easily be
+45 bytes long. So if we don't have a large amount of space to attack the
+vulnerable server is better to use Socket Descriptor Reuse Shellcode.
+
+
+--[ 3. Alternative approaches we considered :
+
+	--[ 3.1 - Port Binding Shellcode
+	This is the most primitive technique. We just recreate a shellcode that
+	create a server on the exploited host that executes a shell when connected
+	to. Drawbacks : we have to create the socket (so the shellcode can be quite
+	long) and a firewall can be in place with a default deny policy and can cause
+	our shellcode to terminate. (Because the firewall will see that a distant host
+	try to reach our computer, so obviously the firewall will end the attack).
+	
+	--[ 3.2 - Socket Descriptor Reuse Shellcode
+	This is a better tactic. Here we recycle the current socket descriptor and
+	utilize that socket instead of creating a new one. Drawbacks : we have to
+	identify the socket descriptor (the addr of the socket descriptor might
+	change and even the number of the socket descriptor might change).
+	Advantage : shellcode shorter, the firewall	won't keep us from doing that
+	cause we reuse a already existing socket. This is the best solution
+	
+	--[ 3.3 - Connect Back Shellcode (the one which works)
+	The same principle of Port Binding Shellcode but this time we use an out
+	connection. Thus, the firewall won't detect it easily because nowadays
+	every computer are connected to the web (see explanations in part 2).
+	
+	
+									
+										08/12/2014
+
