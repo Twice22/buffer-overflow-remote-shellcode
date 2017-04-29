@@ -1,6 +1,4 @@
-#Julien ROLLET ............................................[14106141]
-#Clement RICHET DE FORGES .................................[14107937]
-#Victor BUSA ..............................................[14107023]
+# Author: Victor BUSA
 
 .globl main
 	.type	main, @function
